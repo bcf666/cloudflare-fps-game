@@ -8,7 +8,7 @@
     "skipLibCheck": true,
     "lib": ["ES2022"],
     "types": ["@cloudflare/workers-types"],
-    "baseUrl": "/workspace",
+    "baseUrl": "..",
     "paths": {
       "@shared/*": ["./shared/*"]
     },
@@ -19,6 +19,6 @@
   },
   "include": [
     "src/**/*.ts",
-    "/workspace/shared/**/*.ts"
+    "../shared/**/*.ts"
   ]
 }

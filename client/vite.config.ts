@@ -1,7 +1,9 @@
 import { defineConfig } from 'vite';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const SHARED_DIR = '/workspace/shared';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const SHARED_DIR = path.resolve(__dirname, '../shared');
 
 export default defineConfig({
   resolve: {
