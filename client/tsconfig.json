@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "lib": ["ES2022", "DOM"],
+    "baseUrl": "/workspace",
+    "paths": {
+      "@shared/*": ["./shared/*"]
+    },
+    "noEmit": true,
+    "forceConsistentCasingInFileNames": true,
+    "useUnknownInCatchVariables": false,
+    "types": []
+  },
+  "include": [
+    "src/**/*.ts",
+    "/workspace/shared/**/*.ts"
+  ]
+}
