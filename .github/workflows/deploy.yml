@@ -1,18 +1,14 @@
-name: Deploy Worker to Cloudflare
+name: Deploy to Cloudflare (Worker + Pages)
 
 on:
   push:
     branches: [main]
-    paths:
-      - 'server/**'
-      - 'shared/**'
-      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy Worker + Durable Object
+    name: Deploy Worker + Pages
     steps:
       - uses: actions/checkout@v4
 
@@ -20,18 +16,34 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
+      - name: Install server dependencies
         working-directory: server
         run: npm ci || npm install
 
-      - name: Build server (typecheck only)
+      - name: Typecheck server
         working-directory: server
         run: npx tsc --noEmit
 
-      - name: Deploy to Cloudflare Workers
+      - name: Deploy Worker to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: server
           command: deploy src/index.ts
+
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci || npm install
+
+      - name: Build client
+        working-directory: client
+        run: npm run build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: client
+          command: pages deploy dist --project-name=bcf --branch=main
