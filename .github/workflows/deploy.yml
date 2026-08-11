@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare (Worker + Pages)
+name: Deploy to Cloudflare Pages
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy Worker + Pages
+    name: Build & Deploy to Pages (with _worker.js)
     steps:
       - uses: actions/checkout@v4
 
@@ -16,27 +16,15 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install server dependencies
+      - name: Install server dependencies (for typecheck)
         working-directory: server
         run: npm ci || npm install
-
-      - name: Typecheck server
-        working-directory: server
-        run: npx tsc --noEmit
-
-      - name: Deploy Worker to Cloudflare
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: server
-          command: deploy src/index.ts
 
       - name: Install client dependencies
         working-directory: client
         run: npm ci || npm install
 
-      - name: Build client
+      - name: Build client (vite + esbuild _worker.js)
         working-directory: client
         run: npm run build
 

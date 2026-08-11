@@ -4,6 +4,7 @@ export { RoomDO };
 
 interface Env {
   ROOM: DurableObjectNamespace;
+  ASSETS?: Fetcher; // Pages _worker.js 模式下的静态资源绑定
 }
 
 function roomNameFor(id: string) { return id.replace(/[^a-zA-Z0-9]/g, '_'); }
@@ -12,7 +13,7 @@ export default {
   async fetch(req: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(req.url);
 
-    // CORS preflight (for custom domain)
+    // CORS preflight
     if (req.method === 'OPTIONS') {
       return new Response(null, {
         headers: {
@@ -52,6 +53,10 @@ export default {
       return new Response(JSON.stringify({ ok: true }), {
         headers: { 'Content-Type': 'application/json' },
       });
+    }
+    // Pages _worker.js 模式：非 API 请求 fallback 到静态资源
+    if (env.ASSETS) {
+      return env.ASSETS.fetch(req);
     }
     return new Response('FPS Server OK', { status: 200, headers: { 'Access-Control-Allow-Origin': '*' } });
   },
