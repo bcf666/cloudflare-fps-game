@@ -4,7 +4,7 @@ export { RoomDO };
 
 interface Env {
   ROOM: DurableObjectNamespace;
-  ASSETS?: Fetcher; // Pages _worker.js 模式下的静态资源绑定
+  ASSETS?: Fetcher; // 静态资源绑定（用于非静态资源路径的 fallback）
 }
 
 function roomNameFor(id: string) { return id.replace(/[^a-zA-Z0-9]/g, '_'); }
@@ -54,7 +54,7 @@ export default {
         headers: { 'Content-Type': 'application/json' },
       });
     }
-    // Pages _worker.js 模式：非 API 请求 fallback 到静态资源
+    // 静态资源 fallback：非 API/WS 路径交给 ASSETS 处理（SPA 回退由 wrangler.toml 配置）
     if (env.ASSETS) {
       return env.ASSETS.fetch(req);
     }
