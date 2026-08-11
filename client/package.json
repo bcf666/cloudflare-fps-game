@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build && esbuild ../server/src/index.ts --bundle --format=esm --outfile=dist/_worker.js --external:cloudflare:* --tsconfig=../server/tsconfig.json",
+    "build": "tsc --noEmit && vite build && esbuild src/worker-proxy.ts --bundle --format=esm --outfile=dist/_worker.js",
     "preview": "vite preview"
   },
   "dependencies": {

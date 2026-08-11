@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare Pages
+name: Deploy Worker (frontend + backend + DO)
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Build & Deploy to Pages (with _worker.js + DO)
+    name: Build & Deploy Worker with Static Assets
     steps:
       - uses: actions/checkout@v4
 
@@ -16,22 +16,22 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install server dependencies (for typecheck)
-        working-directory: server
-        run: npm ci || npm install
-
       - name: Install client dependencies
         working-directory: client
         run: npm ci || npm install
 
-      - name: Build client (vite + esbuild _worker.js)
+      - name: Build client (vite)
         working-directory: client
-        run: npm run build
+        run: npx vite build
 
-      - name: Deploy to Cloudflare Pages (with DO migration)
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci || npm install
+
+      - name: Deploy Worker (serves frontend + API + WS + DO)
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: client
-          command: pages deploy dist --project-name=bcf --branch=main
+          workingDirectory: server
+          command: deploy
