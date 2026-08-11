@@ -1,0 +1,12 @@
+{
+  "name": "fps-multiplayer",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": ["client", "server"],
+  "scripts": {
+    "dev:client": "npm -w client run dev",
+    "dev:server": "npm -w server run dev",
+    "build:client": "npm -w client run build",
+    "deploy:server": "npm -w server run deploy"
+  }
+}
