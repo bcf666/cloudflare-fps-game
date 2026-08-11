@@ -32,11 +32,16 @@ export class NetworkManager {
 
   connect(wsPath: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-      let url = `${proto}//${location.host}${wsPath}`;
-      // 如果 host 是 file:// 或其他空 host，默认 localhost:8787
-      if (!location.host || location.protocol === 'file:') {
-        url = `ws://localhost:8787${wsPath}`;
+      let url: string;
+      // 已经是绝对 WebSocket URL（ws:// 或 wss://）直接用
+      if (wsPath.startsWith('ws://') || wsPath.startsWith('wss://')) {
+        url = wsPath;
+      } else {
+        const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        url = `${proto}//${location.host}${wsPath}`;
+        if (!location.host || location.protocol === 'file:') {
+          url = `ws://localhost:8787${wsPath}`;
+        }
       }
       this.ws = new WebSocket(url);
       this.ws.binaryType = 'arraybuffer';

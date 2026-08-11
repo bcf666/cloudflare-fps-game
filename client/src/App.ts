@@ -7,6 +7,9 @@ import { GameHUD } from './ui/GameHUD';
 import { ResultScreen } from './ui/ResultScreen';
 import type { Team } from '@shared/constants';
 
+// Cloudflare Worker 域名（直接连到此服务，绕开 pages.dev 路由限制）
+export const WORKER_BASE = 'https://fps-game-server.bcf-20120924.workers.dev';
+
 export type Phase = 'menu' | 'lobby' | 'playing' | 'result';
 type GameEndCb = (winner: 'A' | 'B' | 'draw', scoreA: number, scoreB: number) => void;
 
@@ -60,10 +63,14 @@ export class App {
         overlay.innerHTML = `<div class="panel" style="min-width:280px;text-align:center;"><div class="loading">正在连接匹配服务</div></div>`;
         this.uiRoot.appendChild(overlay);
         try {
-          const res = await fetch('/api/matchmaking/quick', { method: 'POST' });
+          const res = await fetch(`${WORKER_BASE}/api/matchmaking/quick`, { method: 'POST' });
           if (!res.ok) throw new Error('match server err ' + res.status);
           const info = await res.json();
-          await this.net.connect(info.wsUrl);
+          // info.wsUrl 是相对路径（如 /ws/default），前缀用 Worker 域名
+          const wsUrl = info.wsUrl.startsWith('ws')
+            ? info.wsUrl
+            : `${WORKER_BASE.startsWith('https:') ? 'wss' : 'ws'}://${WORKER_BASE.replace(/^https?:\/\//, '')}${info.wsUrl}`;
+          await this.net.connect(wsUrl);
           this._cleanupWelcome = (id: string, team: Team) => {
             this.myPlayerId = id; this.myTeam = team;
           };
@@ -140,9 +147,12 @@ export class App {
         overlay.innerHTML = `<div class="panel" style="min-width:280px;text-align:center;"><div class="loading">正在重连</div></div>`;
         this.uiRoot.appendChild(overlay);
         try {
-          const res = await fetch('/api/matchmaking/quick', { method: 'POST' });
+          const res = await fetch(`${WORKER_BASE}/api/matchmaking/quick`, { method: 'POST' });
           const info = await res.json();
-          await this.net.connect(info.wsUrl);
+          const wsUrl = info.wsUrl.startsWith('ws')
+            ? info.wsUrl
+            : `${WORKER_BASE.startsWith('https:') ? 'wss' : 'ws'}://${WORKER_BASE.replace(/^https?:\/\//, '')}${info.wsUrl}`;
+          await this.net.connect(wsUrl);
           this.net.onWelcome = (id, team) => { this.myPlayerId = id; this.myTeam = team; };
           this.showLobby();
         } catch {
